@@ -1,0 +1,427 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String         @id @default(cuid())
+  email                   String         @unique
+  emailVerified           DateTime?
+  name                    String?
+  password                String?
+  role                    Role           @default(CLIENT)
+  status                  AccountStatus  @default(ACTIVE)
+  lastLoginAt             DateTime?
+  
+  // Notification Preferences
+  emailNotifications      Boolean        @default(true)
+  notifyOnPacketReady     Boolean        @default(true)
+  notifyOnPacketUpdate    Boolean        @default(true)
+  
+  client                  Client?
+  accounts                Account[]
+  sessions                Session[]
+  inviteTokens            InviteToken[]
+  auditLogs               AuditLog[]
+  notifications           Notification[]
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+enum Role {
+  CLIENT
+  COACH
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum TokenType {
+  ACCOUNT_SETUP
+  PASSWORD_RESET
+}
+
+model Client {
+  id                    String       @id @default(cuid())
+  userId                String       @unique
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Info
+  fullName              String
+  email                 String       @unique
+  
+  // Client Classification
+  clientType            ClientType?
+  intakeCompletedAt     DateTime?
+  
+  // Intake Responses (JSON storage for flexibility)
+  intakeResponses       Json?
+  
+  // Original fields preserved
+  goal                  String?
+  gender                String?
+  dateOfBirth           DateTime?
+  heightInches          Int?
+  weightLbs             Float?
+  
+  // Activity & Goals
+  activityLevel         String?
+  dailyMovementPattern  String?
+  mainFitnessGoals      String?
+  trainingExperience    String?
+  trainingHistory       String?
+  
+  // Training Preferences
+  daysPerWeek           Int?
+  sessionDuration       Int?
+  preferredWorkoutTime  String?
+  availableEquipment    String?
+  workoutLocation       String?
+  trainingStyle         String?
+  coachingStyle         String?
+  
+  // Health & Wellness
+  motivation            String?
+  biggestStruggle       String?
+  injuries              String?
+  medicalConditions     String?
+  medications           String?
+  painOrDiscomfort      String?
+  
+  // Nutrition
+  dietType              String?
+  foodAllergies         String?
+  foodsToAvoid          String?
+  eatsBreakfast         Boolean?
+  eatsAnimalProducts    Boolean?
+  mealsPerDay           Int?
+  beverageConsumption   String?
+  waterIntakeOz         Int?
+  typicalDayEating      String?
+  favoriteMeals         String?
+  preferredMacros       String?
+  fastingPattern        String?
+  culturalDietaryNeeds  String?
+  
+  // Delivery & Communication
+  deliveryPreference    String?
+  wantsWeeklyCheckins   Boolean?
+  
+  // Youth-Specific
+  sportsPlayed          String?
+  schoolGrade           String?
+  eatsBeforePractice    Boolean?
+  staysHydrated         Boolean?
+  seasonMotivation      String?
+  seasonChallenges      String?
+  
+  // Athlete-Specific
+  sport                 String?
+  position              String?
+  competitionLevel      String?
+  seasonPhase           String?
+  trainingAge           Int?
+  
+  // Performance Metrics
+  strengthBenchmarks    Json?
+  powerMetrics          Json?
+  speedMetrics          Json?
+  conditioningMetrics   Json?
+  
+  // Situation Based
+  injuryLocation        String?
+  painPatterns          String?
+  aggravatingPositions  String?
+  medicalClearance      Boolean?
+  mobilityLimitations   String?
+  recoveryGoals         String?
+  
+  // Relations
+  packets               Packet[]
+  intakeProgress        IntakeProgress?
+  
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  
+  @@index([clientType])
+  @@index([email])
+  @@index([userId])
+  @@index([intakeCompletedAt])
+  @@index([createdAt])
+}
+
+model Packet {
+  id                String        @id @default(cuid())
+  clientId          String
+  client            Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  type              PacketType
+  status            PacketStatus  @default(PENDING)
+  
+  // Content Storage
+  content           Json?         // Structured packet data
+  docUrl            String?       // Generated document URL
+  pdfUrl            String?       // PDF export URL
+  
+  // Generation Metadata
+  templateId        String?
+  generatedBy       String?       // 'SYSTEM' or userId of coach
+  generationMethod  String?       // 'AI', 'TEMPLATE', 'MANUAL'
+  
+  // Error Handling
+  lastError         String?
+  retryCount        Int           @default(0)
+  
+  // Versioning
+  version           Int           @default(1)
+  previousVersionId String?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([clientId, type])
+  @@index([status])
+  @@index([clientId, status])
+  @@index([status, retryCount])
+  @@index([createdAt])
+  @@index([updatedAt])
+}
+
+// Client Type Enum
+enum ClientType {
+  NUTRITION_ONLY
+  WORKOUT_ONLY
+  FULL_PROGRAM
+  ATHLETE_PERFORMANCE
+  YOUTH
+  GENERAL_WELLNESS
+  SPECIAL_SITUATION
+}
+
+// Packet Type Enum (expanded)
+enum PacketType {
+  INTRO
+  NUTRITION
+  WORKOUT
+  PERFORMANCE
+  YOUTH
+  RECOVERY
+  WELLNESS
+}
+
+enum PacketStatus {
+  PENDING
+  GENERATING
+  READY
+  FAILED
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model InviteToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// Intake Progress Tracking
+model IntakeProgress {
+  id                String      @id @default(cuid())
+  clientId          String      @unique
+  client            Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  selectedPath      ClientType?
+  currentStep       Int         @default(0)
+  totalSteps        Int?
+  responses         Json?
+  isComplete        Boolean     @default(false)
+  lastSavedAt       DateTime    @default(now())
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([isComplete])
+  @@index([selectedPath])
+  @@index([lastSavedAt])
+}
+
+// Question Block Library
+model QuestionBlock {
+  id                String      @id @default(cuid())
+  name              String      @unique
+  category          String      // 'NUTRITION', 'TRAINING', 'HEALTH', etc.
+  questions         Json        // Array of question definitions
+  order             Int         @default(0)
+  isActive          Boolean     @default(true)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([category])
+  @@index([isActive])
+  @@index([category, isActive])
+}
+
+// Intake Path Configuration
+model IntakePath {
+  id                String      @id @default(cuid())
+  clientType        ClientType  @unique
+  name              String
+  description       String
+  questionBlocks    Json        // Array of question block IDs in order
+  branchingRules    Json        // Conditional logic rules
+  isActive          Boolean     @default(true)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([isActive])
+}
+
+// Packet Template
+model PacketTemplate {
+  id                String      @id @default(cuid())
+  name              String
+  packetType        PacketType
+  clientType        ClientType?
+  
+  // Template Content
+  sections          Json        // Array of section definitions
+  contentBlocks     Json        // Reusable content blocks
+  
+  // Metadata
+  isDefault         Boolean     @default(false)
+  createdBy         String?
+  isActive          Boolean     @default(true)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([packetType, clientType])
+  @@index([isDefault])
+  @@index([isActive])
+  @@index([packetType, isDefault, isActive])
+}
+
+// Analytics
+model IntakeAnalytics {
+  id                String      @id @default(cuid())
+  clientType        ClientType
+  startedAt         DateTime
+  completedAt       DateTime?
+  abandonedAt       DateTime?
+  completionTime    Int?        // seconds
+  dropOffStep       Int?
+  
+  createdAt         DateTime    @default(now())
+  
+  @@index([clientType])
+  @@index([completedAt])
+  @@index([abandonedAt])
+  @@index([startedAt])
+  @@index([clientType, completedAt])
+}
+
+// In-App Notifications
+model Notification {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type              NotificationType
+  title             String
+  message           String
+  
+  // Related resource
+  resourceType      String?     // 'PACKET', 'CLIENT', etc.
+  resourceId        String?
+  
+  // Status
+  isRead            Boolean     @default(false)
+  readAt            DateTime?
+  
+  createdAt         DateTime    @default(now())
+  
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  PACKET_READY
+  PACKET_UPDATED
+  PACKET_FAILED
+  SYSTEM_ALERT
+  GENERAL
+}
