@@ -381,7 +381,7 @@ export const generalWellnessPath: IntakePathConfig = {
 export const situationBasedPath: IntakePathConfig = {
   id: 'situation-based',
   clientType: 'SPECIAL_SITUATION',
-  name: 'Special Situation',
+  name: 'Movement Needs',
   description: 'Modified guidance for injury recovery or specific health conditions',
   estimatedTime: '12-15 minutes',
   questionBlockIds: [

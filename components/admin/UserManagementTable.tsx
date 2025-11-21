@@ -89,118 +89,143 @@ export default function UserManagementTable({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Search and Filters */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Search Input */}
         <div>
+          <label htmlFor="user-search" className="block text-sm font-medium text-gray-700 mb-2">
+            Search Users
+          </label>
           <input
+            id="user-search"
             type="text"
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-afya-primary focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-afya-primary focus:border-transparent text-base"
           />
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap gap-2">
+        <div className="space-y-3">
           {/* Role Filters */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setRoleFilter('ALL')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                roleFilter === 'ALL'
-                  ? 'bg-afya-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All Roles
-            </button>
-            <button
-              onClick={() => setRoleFilter('CLIENT')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                roleFilter === 'CLIENT'
-                  ? 'bg-gray-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Client
-            </button>
-            <button
-              onClick={() => setRoleFilter('COACH')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                roleFilter === 'COACH'
-                  ? 'bg-blue-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Coach
-            </button>
-            <button
-              onClick={() => setRoleFilter('ADMIN')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                roleFilter === 'ADMIN'
-                  ? 'bg-purple-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Admin
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Role
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setRoleFilter('ALL')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  roleFilter === 'ALL'
+                    ? 'bg-afya-primary text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All Roles
+              </button>
+              <button
+                onClick={() => setRoleFilter('CLIENT')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  roleFilter === 'CLIENT'
+                    ? 'bg-gray-700 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Clients
+              </button>
+              <button
+                onClick={() => setRoleFilter('COACH')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  roleFilter === 'COACH'
+                    ? 'bg-blue-700 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Coaches
+              </button>
+              <button
+                onClick={() => setRoleFilter('ADMIN')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  roleFilter === 'ADMIN'
+                    ? 'bg-purple-700 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Admins
+              </button>
+            </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-l border-gray-300"></div>
-
           {/* Status Filters */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setStatusFilter('ALL')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                statusFilter === 'ALL'
-                  ? 'bg-afya-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All Status
-            </button>
-            <button
-              onClick={() => setStatusFilter('ACTIVE')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                statusFilter === 'ACTIVE'
-                  ? 'bg-green-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Active
-            </button>
-            <button
-              onClick={() => setStatusFilter('SUSPENDED')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                statusFilter === 'SUSPENDED'
-                  ? 'bg-yellow-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Suspended
-            </button>
-            <button
-              onClick={() => setStatusFilter('DEACTIVATED')}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                statusFilter === 'DEACTIVATED'
-                  ? 'bg-red-700 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Deactivated
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Status
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setStatusFilter('ALL')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  statusFilter === 'ALL'
+                    ? 'bg-afya-primary text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All Status
+              </button>
+              <button
+                onClick={() => setStatusFilter('ACTIVE')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  statusFilter === 'ACTIVE'
+                    ? 'bg-green-700 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setStatusFilter('SUSPENDED')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  statusFilter === 'SUSPENDED'
+                    ? 'bg-yellow-700 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Suspended
+              </button>
+              <button
+                onClick={() => setStatusFilter('DEACTIVATED')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  statusFilter === 'DEACTIVATED'
+                    ? 'bg-red-700 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Deactivated
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Results Count */}
-      <div className="text-sm text-gray-600">
-        Showing {filteredUsers.length} of {users.length} users
+      <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+        <div className="text-sm font-medium text-gray-700">
+          Showing {filteredUsers.length} of {users.length} users
+        </div>
+        {(searchQuery || roleFilter !== 'ALL' || statusFilter !== 'ALL') && (
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setRoleFilter('ALL');
+              setStatusFilter('ALL');
+            }}
+            className="text-sm text-afya-primary hover:text-afya-primary-dark font-medium"
+          >
+            Clear all filters
+          </button>
+        )}
       </div>
 
       {/* Table */}

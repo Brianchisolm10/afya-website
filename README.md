@@ -1,17 +1,28 @@
-# AFYA Website V1
+# AFYA Website V2
 
-A Next.js application for AFYA - Movement for Everyone. This application combines a public marketing site with an authenticated client portal for managing personalized health and fitness packets.
+A Next.js application for AFYA - Movement for Everyone. This application combines a public marketing site with an authenticated client portal for managing personalized health and fitness packets, plus community-focused features including an e-commerce shop, impact programs, and real-time community engagement tracking.
 
 ## Features
 
+### Core Features
 - 🏠 Public marketing pages with AFYA mission and services
-- 📝 Client intake form for onboarding
+- 📝 Dynamic intake form system with multiple program paths
 - 🔐 Email-based authentication (magic links and password)
 - 👥 Account management system with role-based access control
 - 📊 Client dashboard with packet status tracking
-- 👨‍💼 Admin panel for managing clients and team members
+- 👨‍💼 Admin panel for managing clients, team members, and content
 - 🔗 Webhook integration with Google Apps Script
-- 📱 Fully responsive design
+- 📱 Fully responsive, mobile-first design
+
+### V2 New Features
+- 🛍️ **Shop**: E-commerce platform for AFYA merchandise with Stripe integration
+- 💝 **Donation Allocation**: 25% of every purchase supports Foundations or Sponsor-A-Client programs
+- 🌍 **Impact Page**: Showcase community initiatives including donations, sponsorships, and gear drives
+- ♻️ **Gear Drive**: Active program for donating used workout clothing
+- 📈 **Community Minutes Moved Counter**: Real-time tracking of total movement across all clients
+- 🎯 **Programs Page**: Comprehensive display of all 7 AFYA wellness programs
+- 🎨 **Enhanced Navigation & Footer**: Simplified navigation with expanded footer organization
+- 💳 **Stripe Payment Processing**: Secure checkout with support for cards, Apple Pay, and Google Pay
 
 ## Tech Stack
 
@@ -21,6 +32,7 @@ A Next.js application for AFYA - Movement for Everyone. This application combine
 - **Database**: PostgreSQL
 - **ORM**: Prisma
 - **Authentication**: NextAuth.js v5
+- **Payments**: Stripe
 - **Deployment**: Vercel
 
 ## Getting Started
@@ -30,6 +42,7 @@ A Next.js application for AFYA - Movement for Everyone. This application combine
 - Node.js 18+ installed
 - PostgreSQL database (local or hosted)
 - SMTP server for sending emails (Gmail, SendGrid, Resend, etc.)
+- Stripe account (for shop functionality) - [Sign up free](https://stripe.com)
 
 ### Local Development Setup
 
@@ -68,6 +81,16 @@ EMAIL_FROM="noreply@afya.com"
 
 # Webhook - Generate a secure secret
 WEBHOOK_SECRET="generate-with-openssl-rand-base64-32"
+
+# Stripe - Get from https://dashboard.stripe.com/apikeys
+STRIPE_SECRET_KEY="sk_test_..." # Use sk_test_ for development
+STRIPE_PUBLISHABLE_KEY="pk_test_..." # Use pk_test_ for development
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..." # Same as above, for client-side
+STRIPE_WEBHOOK_SECRET="whsec_..." # Get from Stripe webhook settings
+
+# Feature Flags (optional)
+NEXT_PUBLIC_SHOP_ENABLED="true"
+NEXT_PUBLIC_GEAR_DRIVE_ENABLED="true"
 ```
 
 **Generate secure secrets:**
@@ -79,6 +102,16 @@ openssl rand -base64 32
 # Generate WEBHOOK_SECRET
 openssl rand -base64 32
 ```
+
+**Set up Stripe (for shop functionality):**
+
+1. Create a free Stripe account at [stripe.com](https://stripe.com)
+2. Get your API keys from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
+3. For development, use test mode keys (they start with `sk_test_` and `pk_test_`)
+4. For production, use live mode keys (they start with `sk_live_` and `pk_live_`)
+5. Set up a webhook endpoint (see Stripe Configuration section below)
+
+For detailed Stripe setup instructions, see [docs/STRIPE_SETUP_GUIDE.md](./docs/STRIPE_SETUP_GUIDE.md)
 
 3. **Set up the database:**
 
@@ -94,12 +127,24 @@ Generate Prisma Client:
 npx prisma generate
 ```
 
-4. **Create the initial admin account:**
+4. **Seed initial data:**
 
-Run the seed script to create your first admin user:
+Create your first admin user:
 
 ```bash
 npm run seed:admin
+```
+
+Seed community stats (for Community Minutes Moved counter):
+
+```bash
+npx tsx scripts/seed-community-stats.ts
+```
+
+Seed sample products (optional, for testing shop):
+
+```bash
+npx tsx prisma/seed-products.ts
 ```
 
 Or using npx directly:
@@ -155,33 +200,196 @@ npx prisma studio
 afya-website/
 ├── app/
 │   ├── (public)/          # Public marketing pages
+│   │   ├── programs/      # Programs listing page
+│   │   ├── shop/          # Shop pages (products, checkout, orders)
+│   │   ├── impact/        # Impact page with community initiatives
+│   │   └── ...            # Other public pages
 │   ├── (auth)/            # Authentication pages (login, setup, reset-password)
 │   ├── (protected)/       # Protected client portal pages
-│   │   ├── admin/         # Admin panel and user management
+│   │   ├── admin/         # Admin panel
+│   │   │   ├── users/     # User management
+│   │   │   ├── products/  # Product management
+│   │   │   ├── content/   # Content management
+│   │   │   └── analytics/ # Analytics dashboard
 │   │   ├── dashboard/     # Client dashboard
 │   │   └── settings/      # User profile settings
 │   └── api/               # API routes
-│       ├── admin/         # Admin endpoints (user management)
-│       ├── auth/          # Auth endpoints (setup, reset-password)
-│       └── me/            # User profile endpoints
+│       ├── admin/         # Admin endpoints
+│       ├── auth/          # Auth endpoints
+│       ├── shop/          # Shop endpoints (products, cart, checkout)
+│       ├── impact/        # Impact endpoints (donations, gear drive)
+│       ├── community/     # Community stats and activity
+│       └── webhooks/      # Webhook handlers (Stripe)
 ├── components/            # Reusable React components
-│   ├── admin/             # Admin-specific components (user tables, dialogs)
-│   ├── auth/              # Auth components (login, setup, reset forms)
+│   ├── admin/             # Admin-specific components
+│   ├── auth/              # Auth components
+│   ├── shop/              # Shop components (ProductCard, CheckoutForm, etc.)
+│   ├── impact/            # Impact components (DonationForm, GearDriveForm, etc.)
+│   ├── community/         # Community components (CommunityCounter)
+│   ├── programs/          # Program components (ProgramCard)
+│   ├── layout/            # Layout components (Navigation, Footer)
 │   ├── settings/          # Profile settings components
 │   └── ui/                # Shared UI components
 ├── lib/                   # Utility functions and configurations
 │   ├── auth.ts            # NextAuth configuration
 │   ├── authorization.ts   # Role-based access control
-│   ├── password.ts        # Password hashing and validation
-│   ├── tokens.ts          # Token generation and validation
+│   ├── stripe.ts          # Stripe configuration
+│   ├── cache.ts           # Caching utilities
 │   ├── email.ts           # Email sending utilities
-│   ├── ratelimit.ts       # Rate limiting
-│   └── audit.ts           # Audit logging
+│   └── ...                # Other utilities
 ├── types/                 # TypeScript type definitions
 ├── prisma/                # Database schema and migrations
-│   └── schema.prisma      # Database models (User, InviteToken, AuditLog)
+│   └── schema.prisma      # Database models (User, Product, Order, etc.)
+├── docs/                  # Documentation
+│   ├── STRIPE_SETUP_GUIDE.md
+│   ├── ADMIN_GUIDE.md
+│   └── USER_GUIDE.md
 └── public/                # Static assets
 ```
+
+## Shop & Stripe Configuration
+
+### Stripe Setup
+
+AFYA uses Stripe for payment processing in the shop. Stripe provides a comprehensive payment solution with no monthly fees (pay-per-transaction: 2.9% + $0.30).
+
+**Supported Payment Methods:**
+- Credit/Debit Cards (Visa, Mastercard, Amex, Discover)
+- Apple Pay (automatic on Safari/iOS)
+- Google Pay (automatic on Chrome/Android)
+- Link by Stripe (one-click checkout)
+
+### Development Setup
+
+1. **Create a Stripe account:**
+   - Sign up at [stripe.com](https://stripe.com) (free)
+   - Verify your email address
+
+2. **Get your API keys:**
+   - Go to [Stripe Dashboard → API Keys](https://dashboard.stripe.com/apikeys)
+   - Copy your test mode keys (they start with `sk_test_` and `pk_test_`)
+   - Add them to your `.env` file:
+
+   ```env
+   STRIPE_SECRET_KEY="sk_test_..."
+   STRIPE_PUBLISHABLE_KEY="pk_test_..."
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+   ```
+
+3. **Set up webhook endpoint (for local testing):**
+   
+   Install Stripe CLI:
+   ```bash
+   # macOS
+   brew install stripe/stripe-cli/stripe
+   
+   # Other platforms: https://stripe.com/docs/stripe-cli
+   ```
+
+   Login to Stripe CLI:
+   ```bash
+   stripe login
+   ```
+
+   Forward webhooks to your local server:
+   ```bash
+   stripe listen --forward-to localhost:3000/api/webhooks/stripe
+   ```
+
+   Copy the webhook signing secret (starts with `whsec_`) and add to `.env`:
+   ```env
+   STRIPE_WEBHOOK_SECRET="whsec_..."
+   ```
+
+4. **Test the shop:**
+   - Start your development server: `npm run dev`
+   - Navigate to `/shop`
+   - Use Stripe test cards:
+     - Success: `4242 4242 4242 4242`
+     - Decline: `4000 0000 0000 0002`
+     - Any future expiry date, any CVC
+
+For detailed Stripe setup instructions, see [docs/STRIPE_SETUP_GUIDE.md](./docs/STRIPE_SETUP_GUIDE.md)
+
+### Product Management
+
+Administrators can manage products through the admin panel:
+
+1. **Navigate to Product Management:**
+   - Log in as an admin
+   - Go to `/admin/products`
+
+2. **Add a Product:**
+   - Click "Add Product"
+   - Enter product details (name, description, price, category)
+   - Upload product images
+   - Set inventory levels
+   - Configure sizes and colors (optional)
+   - Mark as "Drop" for limited-time items (optional)
+
+3. **Edit or Delete Products:**
+   - Click the action menu on any product
+   - Select "Edit" to modify or "Delete" to remove
+
+4. **Product Categories:**
+   - **Apparel**: T-shirts, hoodies, shorts, etc.
+   - **Accessories**: Water bottles, bags, bands, etc.
+   - **Drops**: Limited-time exclusive items
+   - **Collections**: Curated product bundles
+
+### Donation Allocation
+
+Every purchase in the shop includes a 25% donation allocation:
+
+1. **Customer selects allocation during checkout:**
+   - **Foundations**: Supports AFYA's general operations and community programs
+   - **Sponsor-A-Client**: Funds wellness packets for clients in need
+
+2. **Allocation is recorded with the order:**
+   - Visible in order confirmation
+   - Tracked in admin analytics
+   - Included in donation reports
+
+3. **Admin can view allocation statistics:**
+   - Go to `/admin/analytics`
+   - View donation allocation breakdown
+   - Export reports for accounting
+
+## Impact Programs
+
+### Gear Drive
+
+The Gear Drive program accepts donations of used workout clothing for recycling, upcycling, redistribution, and community events.
+
+**How it works:**
+1. Visitors go to `/impact/gear-drive`
+2. Fill out the donation form with:
+   - Donor information
+   - Item types and quantity
+   - Condition assessment
+   - Preferred dropoff method (dropoff, pickup, or shipping)
+3. Submit the form
+4. Receive confirmation email with next steps
+
+**Admin Management:**
+- View all submissions at `/admin` (coming soon)
+- Track submission status
+- Coordinate logistics
+
+### Community Minutes Moved Counter
+
+The Community Minutes Moved counter displays the total minutes of movement logged by all AFYA clients.
+
+**How it works:**
+1. Clients log activity in their dashboard
+2. Activity is recorded via `/api/community/activity`
+3. Counter updates in real-time on the home page and impact page
+4. Displays aggregate community impact
+
+**Admin can:**
+- View detailed activity logs
+- Export activity data
+- Monitor engagement trends
 
 ## Deployment
 
@@ -211,15 +419,32 @@ afya-website/
    Go to Project Settings → Environment Variables and add:
 
    ```
+   # Database
    DATABASE_URL=<your-postgres-connection-string>
+   
+   # NextAuth
    NEXTAUTH_URL=https://your-domain.vercel.app
    NEXTAUTH_SECRET=<generate-with-openssl-rand-base64-32>
+   
+   # Email
    EMAIL_SERVER_HOST=<your-smtp-host>
    EMAIL_SERVER_PORT=<your-smtp-port>
    EMAIL_SERVER_USER=<your-smtp-user>
    EMAIL_SERVER_PASSWORD=<your-smtp-password>
    EMAIL_FROM=noreply@afya.com
+   
+   # Webhooks
    WEBHOOK_SECRET=<generate-with-openssl-rand-base64-32>
+   
+   # Stripe (use live keys for production)
+   STRIPE_SECRET_KEY=sk_live_...
+   STRIPE_PUBLISHABLE_KEY=pk_live_...
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+   STRIPE_WEBHOOK_SECRET=<from-stripe-webhook-settings>
+   
+   # Feature Flags (optional)
+   NEXT_PUBLIC_SHOP_ENABLED=true
+   NEXT_PUBLIC_GEAR_DRIVE_ENABLED=true
    ```
 
    **Important**: Make sure to add these variables for all environments (Production, Preview, Development)
@@ -259,7 +484,19 @@ afya-website/
    DATABASE_URL="<production-database-url>" npx prisma migrate deploy
    ```
 
-7. **Configure custom domain (optional):**
+7. **Configure Stripe webhook for production:**
+
+   - Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
+   - Click "Add endpoint"
+   - Enter your webhook URL: `https://your-domain.vercel.app/api/webhooks/stripe`
+   - Select events to listen for:
+     - `payment_intent.succeeded`
+     - `payment_intent.payment_failed`
+     - `charge.refunded`
+   - Copy the webhook signing secret (starts with `whsec_`)
+   - Add it to Vercel environment variables as `STRIPE_WEBHOOK_SECRET`
+
+8. **Configure custom domain (optional):**
 
    - Go to Project Settings → Domains
    - Add your custom domain
@@ -299,7 +536,19 @@ afya-website/
 
    Note: This method requires the user to already exist and have a password set.
 
-2. **Configure Google Apps Script webhook:**
+2. **Seed initial data:**
+
+   Seed community stats:
+   ```bash
+   DATABASE_URL="<production-database-url>" npx tsx scripts/seed-community-stats.ts
+   ```
+
+   Seed sample products (optional):
+   ```bash
+   DATABASE_URL="<production-database-url>" npx tsx prisma/seed-products.ts
+   ```
+
+3. **Configure Google Apps Script webhook:**
 
    Update your Google Apps Script with the production webhook URL and secret:
 
@@ -308,13 +557,15 @@ afya-website/
    const WEBHOOK_SECRET = 'your-webhook-secret';
    ```
 
-3. **Test the application:**
+4. **Test the application:**
 
    - Visit your production URL
    - Submit an intake form
    - Test authentication with magic link
    - Verify admin panel access
-   - Test webhook integration
+   - Test shop checkout flow with Stripe test mode
+   - Test gear drive submission
+   - Verify webhook integration
 
 ## Database Migrations
 
@@ -372,6 +623,14 @@ npx prisma migrate reset
 | `EMAIL_SERVER_PASSWORD` | SMTP password | Yes | Your app password |
 | `EMAIL_FROM` | From address for emails | Yes | `noreply@afya.com` |
 | `WEBHOOK_SECRET` | Shared secret for webhooks | Yes | Generate with `openssl rand -base64 32` |
+| `STRIPE_SECRET_KEY` | Stripe secret API key | Yes* | `sk_test_...` or `sk_live_...` |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key (server) | Yes* | `pk_test_...` or `pk_live_...` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key (client) | Yes* | `pk_test_...` or `pk_live_...` |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret | Yes* | `whsec_...` |
+| `NEXT_PUBLIC_SHOP_ENABLED` | Enable/disable shop feature | No | `true` or `false` (default: `true`) |
+| `NEXT_PUBLIC_GEAR_DRIVE_ENABLED` | Enable/disable gear drive | No | `true` or `false` (default: `true`) |
+
+*Required if shop functionality is enabled
 
 ## Account Management
 
@@ -655,10 +914,23 @@ npx prisma migrate dev    # Create and apply migration (dev)
 npx prisma migrate deploy # Apply migrations (production)
 npx prisma migrate reset  # Reset database (dev only)
 
-# Admin Setup
+# Seeding
 npm run seed:admin                         # Create initial admin (interactive)
 npm run seed:admin <email> <password> <name>  # Create admin (non-interactive)
-npx tsx scripts/seed-admin.ts              # Alternative: using tsx directly
+npx tsx scripts/seed-community-stats.ts    # Initialize community stats
+npx tsx prisma/seed-products.ts            # Seed sample products
+npx tsx prisma/seed-intake-paths.ts        # Seed intake paths
+npx tsx prisma/seed-question-blocks.ts     # Seed question blocks
+npx tsx prisma/seed-packet-templates.ts    # Seed packet templates
+
+# Testing
+npm run test         # Run all tests
+npm run test:unit    # Run unit tests
+npm run test:integration  # Run integration tests
+npm run test:e2e     # Run end-to-end tests
+
+# Stripe (Development)
+stripe listen --forward-to localhost:3000/api/webhooks/stripe  # Forward webhooks locally
 ```
 
 ## Troubleshooting
@@ -707,13 +979,70 @@ npx tsx scripts/seed-admin.ts              # Alternative: using tsx directly
 - Verify `WEBHOOK_SECRET` matches in both application and Google Apps Script
 - Check that `X-Webhook-Secret` header is being sent correctly
 
+### Shop & Stripe Issues
+
+**Stripe checkout not loading**
+- Verify `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is set correctly
+- Check browser console for errors
+- Ensure you're using the correct key for your environment (test vs. live)
+
+**Payment fails with "Invalid API Key"**
+- Verify `STRIPE_SECRET_KEY` is set correctly in environment variables
+- Ensure you're using the correct key for your environment
+- Check that the key hasn't been revoked in Stripe Dashboard
+
+**Webhook events not received**
+- For local development: Ensure Stripe CLI is running (`stripe listen`)
+- For production: Verify webhook endpoint is configured in Stripe Dashboard
+- Check `STRIPE_WEBHOOK_SECRET` matches the webhook signing secret
+- Review Vercel logs for webhook errors
+
+**Products not displaying**
+- Ensure products are marked as `isActive: true` in the database
+- Check that products have valid images and prices
+- Verify product seeding completed successfully
+
+**Donation allocation not saving**
+- Check that the order includes `donationAllocation` field
+- Verify database schema includes `DonationAllocation` enum
+- Review order creation API logs
+
+### Community Features Issues
+
+**Community Minutes Moved counter not updating**
+- Verify `CommunityStats` table exists and has data
+- Check that activity logging API is working (`/api/community/activity`)
+- Ensure clients are logging activity in their dashboard
+- Review cache settings if using caching
+
+**Gear Drive form not submitting**
+- Check email configuration for confirmation emails
+- Verify `GearDriveSubmission` table exists
+- Review API logs at `/api/impact/gear-drive`
+- Check form validation errors in browser console
+
+## Documentation
+
+For more detailed information, see:
+
+- **[Admin Guide](./docs/ADMIN_GUIDE.md)**: Complete guide for administrators
+- **[User Guide](./docs/USER_GUIDE.md)**: Guide for clients and users
+- **[Stripe Setup Guide](./docs/STRIPE_SETUP_GUIDE.md)**: Detailed Stripe configuration
+- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)**: Development best practices
+- **[Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)**: Production deployment checklist
+- **[Monitoring Guide](./docs/MONITORING_GUIDE.md)**: System monitoring and alerts
+
 ## Support
 
 For issues or questions:
 1. Check the troubleshooting section above
-2. Review Vercel deployment logs
-3. Check Prisma documentation: https://www.prisma.io/docs
-4. Check NextAuth documentation: https://authjs.dev
+2. Review the relevant documentation in `/docs`
+3. Check Vercel deployment logs
+4. Review external documentation:
+   - Prisma: https://www.prisma.io/docs
+   - NextAuth: https://authjs.dev
+   - Stripe: https://stripe.com/docs
+   - Next.js: https://nextjs.org/docs
 
 ## License
 

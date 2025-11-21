@@ -157,6 +157,14 @@ export const authConfig = {
   },
   callbacks: {
     async session({ session, user, token }) {
+      console.log('[AUTH] Session callback called:', { 
+        hasSession: !!session, 
+        hasUser: !!user, 
+        hasToken: !!token,
+        tokenSub: token?.sub,
+        tokenRole: token?.role 
+      });
+      
       // For database strategy, user comes from database
       // For JWT strategy, user info comes from token
       if (session.user) {
@@ -172,20 +180,37 @@ export const authConfig = {
           session.user.status = token.status as string;
         }
       }
+      
+      console.log('[AUTH] Session callback returning:', session);
       return session;
     },
     async jwt({ token, user }) {
+      console.log('[AUTH] JWT callback called:', { hasToken: !!token, hasUser: !!user, userRole: user?.role });
+      
       // Add user info to token on sign in
       if (user) {
         token.role = user.role;
         token.status = user.status;
       }
+      
+      console.log('[AUTH] JWT callback returning:', { sub: token.sub, role: token.role, status: token.status });
       return token;
     },
   },
   session: {
-    strategy: "jwt", // Changed to JWT for credentials provider compatibility
+    strategy: "jwt" as const, // Changed to JWT for credentials provider compatibility
     maxAge: 7 * 24 * 60 * 60, // 7 days
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false, // Set to false for development (localhost)
+      },
+    },
   },
   debug: true, // Enable debug mode to see detailed logs
   // CSRF protection is enabled by default in NextAuth

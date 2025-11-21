@@ -207,6 +207,55 @@ export default function DynamicIntakeForm({
     }
   }, [visibleBlocks, responses, onSubmit]);
 
+  // Track intake start (analytics)
+  useEffect(() => {
+    const trackIntakeStart = async () => {
+      try {
+        await fetch('/api/intake/analytics/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientType: intakePath.clientType
+          })
+        });
+      } catch (error) {
+        console.error('Failed to track intake start:', error);
+      }
+    };
+
+    // Track on initial mount only
+    trackIntakeStart();
+  }, []); // Empty dependency array = run once on mount
+
+  // Track abandonment when user navigates away (analytics)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only track if form is not being submitted
+      if (!isSubmitting) {
+        // Track abandonment asynchronously (best effort)
+        navigator.sendBeacon(
+          '/api/intake/analytics',
+          JSON.stringify({
+            clientType: intakePath.clientType,
+            dropOffStep: currentBlockIndex
+          })
+        );
+      }
+
+      // Show warning if there are unsaved changes
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [intakePath.clientType, currentBlockIndex, isSubmitting, hasUnsavedChanges]);
+
   // Initialize default values for visible questions
   useEffect(() => {
     const newResponses = { ...responses };

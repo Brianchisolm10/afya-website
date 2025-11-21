@@ -33,7 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputType = isPasswordField && showPassword ? 'text' : type;
 
     const baseStyles =
-      'px-4 py-2 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed';
+      'px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed text-base min-h-[44px]';
 
     const errorStyles = hasError
       ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
@@ -89,7 +89,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {error && (
           <p
             id={`${inputId}-error`}
-            className="mt-1 text-sm text-red-600"
+            className="mt-1 text-sm text-red-600 animate-slideDown"
             role="alert"
           >
             {error}

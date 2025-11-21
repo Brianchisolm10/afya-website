@@ -100,7 +100,7 @@ export default function TemplateManager({ onEdit, onPreview, onCreate }: Templat
       ATHLETE_PERFORMANCE: 'Athlete Performance',
       YOUTH: 'Youth',
       GENERAL_WELLNESS: 'General Wellness',
-      SPECIAL_SITUATION: 'Special Situation'
+      SPECIAL_SITUATION: 'Movement Needs'
     };
     return labels[type] || type;
   };
@@ -165,7 +165,7 @@ export default function TemplateManager({ onEdit, onPreview, onCreate }: Templat
               <option value="ATHLETE_PERFORMANCE">Athlete Performance</option>
               <option value="YOUTH">Youth</option>
               <option value="GENERAL_WELLNESS">General Wellness</option>
-              <option value="SPECIAL_SITUATION">Special Situation</option>
+              <option value="SPECIAL_SITUATION">Movement Needs</option>
             </select>
           </div>
           

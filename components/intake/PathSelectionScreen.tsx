@@ -132,7 +132,7 @@ const pathOptions: PathOption[] = [
   },
   {
     id: 'SPECIAL_SITUATION',
-    title: 'Special Situation',
+    title: 'Movement Needs',
     description: 'Modified guidance for injury recovery, chronic conditions, or specific limitations.',
     estimatedTime: '12-15 minutes',
     features: [

@@ -4,6 +4,9 @@ export type { ButtonProps } from './Button';
 export { default as Card } from './Card';
 export type { CardProps } from './Card';
 
+export { default as Section } from './Section';
+export type { SectionProps } from './Section';
+
 export { default as Badge } from './Badge';
 export type { BadgeProps } from './Badge';
 
@@ -17,3 +20,5 @@ export { default as Skeleton } from './Skeleton';
 export type { SkeletonProps } from './Skeleton';
 
 export { BackButton } from './BackButton';
+
+export { default as OptimizedImage } from './OptimizedImage';

@@ -120,11 +120,10 @@ export default function ServicesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-              Our Services
+              How AFYA Works
             </h1>
             <p className="text-xl text-white max-w-3xl mx-auto">
-              Comprehensive, personalized health and fitness packets designed to
-              help you achieve your goals.
+              Personalized health and fitness guidance delivered through custom packets designed for your goals.
             </p>
           </div>
         </div>
@@ -135,10 +134,10 @@ export default function ServicesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Personalized Programs for Every Goal
+              What You'll Receive
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Choose your path and receive custom-generated guidance packets designed specifically for you.
+              Choose the type of guidance you need. Each packet is customized to your goals, experience, and lifestyle.
             </p>
           </div>
 
@@ -146,11 +145,11 @@ export default function ServicesPage() {
             {/* Nutrition Only */}
             <ServiceCard
               id="nutrition"
-              title="Nutrition Only"
-              description="Get personalized nutrition guidance tailored to your dietary needs and goals."
+              title="Nutrition Packet"
+              description="Custom meal plans and nutrition guidance for your goals."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
               features={["Calorie & macro targets", "Meal planning guidance", "Shopping lists", "Recipe suggestions"]}
-              details="Your nutrition packet includes calculated daily calorie targets based on your goals, personalized macronutrient breakdowns, meal timing recommendations, and practical tips for sustainable eating habits. Perfect for those focused on optimizing their diet."
+              details="Your packet includes daily calorie targets, macronutrient breakdowns, meal timing recommendations, and practical tips for sustainable eating habits."
               expanded={expandedService === "nutrition"}
               onToggle={() => toggleService("nutrition")}
               gradient="from-afya-primary to-afya-secondary"
@@ -160,11 +159,11 @@ export default function ServicesPage() {
             {/* Workout Only */}
             <ServiceCard
               id="workout"
-              title="Workout Program"
-              description="Receive a customized workout program based on your fitness level and goals."
+              title="Workout Packet"
+              description="Structured training program for your fitness level."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
               features={["Progressive programming", "Exercise selection", "Training schedule", "Form guidance"]}
-              details="Your workout packet provides a structured training program with exercise demonstrations, progressive overload strategies, and recovery guidance. Designed for your available equipment, schedule, and experience level."
+              details="Your packet includes a structured training program with exercise demonstrations, progressive strategies, and recovery guidance. Designed for your equipment, schedule, and experience."
               expanded={expandedService === "workout"}
               onToggle={() => toggleService("workout")}
               gradient="from-afya-secondary to-afya-primary"
@@ -174,11 +173,11 @@ export default function ServicesPage() {
             {/* Full Program */}
             <ServiceCard
               id="full"
-              title="Full Program"
-              description="Complete nutrition and training guidance for comprehensive transformation."
+              title="Complete Packet"
+              description="Both nutrition and training guidance working together."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
               features={["Complete nutrition plan", "Full workout program", "Integrated approach", "Lifestyle guidance"]}
-              details="Combine both nutrition and workout packets for a holistic approach. Get synchronized meal and training plans that work together to maximize your results. Includes everything from both individual packets plus integration strategies."
+              details="Get synchronized meal and training plans that work together. Includes everything from both packets plus integration strategies for maximum results."
               expanded={expandedService === "full"}
               onToggle={() => toggleService("full")}
               gradient="from-afya-primary via-afya-secondary to-afya-primary"
@@ -189,11 +188,11 @@ export default function ServicesPage() {
             {/* Athlete Performance */}
             <ServiceCard
               id="athlete"
-              title="Athlete Performance"
-              description="Sport-specific training based on NSCA-CSCS principles for competitive athletes."
+              title="Athlete Packet"
+              description="Performance-focused training for competitive athletes."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>}
               features={["Periodization planning", "Sport-specific training", "Performance metrics", "Competition prep"]}
-              details="Advanced programming for competitive athletes including periodization cycles, power development, sport-specific conditioning, and recovery protocols. Aligned with NSCA-CSCS standards for optimal athletic performance."
+              details="Advanced programming including periodization cycles, power development, sport-specific conditioning, and recovery protocols based on sports science standards."
               expanded={expandedService === "athlete"}
               onToggle={() => toggleService("athlete")}
               gradient="from-orange-500 to-red-500"
@@ -203,11 +202,11 @@ export default function ServicesPage() {
             {/* Youth Program */}
             <ServiceCard
               id="youth"
-              title="Youth Program"
-              description="Age-appropriate fitness and nutrition guidance for young athletes and teens."
+              title="Youth Packet"
+              description="Age-appropriate guidance for young athletes and teens."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
               features={["Age-appropriate exercises", "Safety-first approach", "Growth focus", "Parent guidance"]}
-              details="Specially designed for youth with emphasis on proper movement patterns, injury prevention, and long-term athletic development. Includes parent/guardian guidance and focuses on building a healthy relationship with fitness."
+              details="Designed for youth with emphasis on proper movement patterns, injury prevention, and long-term development. Includes parent guidance and builds a healthy relationship with fitness."
               expanded={expandedService === "youth"}
               onToggle={() => toggleService("youth")}
               gradient="from-green-400 to-blue-500"
@@ -217,25 +216,25 @@ export default function ServicesPage() {
             {/* General Wellness */}
             <ServiceCard
               id="wellness"
-              title="General Wellness"
-              description="Practical health and fitness advice for overall wellbeing and lifestyle improvement."
+              title="Wellness Packet"
+              description="Holistic guidance for overall health and lifestyle."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>}
               features={["Lifestyle assessment", "Basic fitness guidance", "Healthy habits", "Sustainable approach"]}
-              details="A holistic approach to wellness covering movement, nutrition, sleep, and stress management. Perfect for those starting their health journey or looking to build sustainable healthy habits without overwhelming complexity."
+              details="A holistic approach covering movement, nutrition, sleep, and stress management. Perfect for starting your health journey or building sustainable habits."
               expanded={expandedService === "wellness"}
               onToggle={() => toggleService("wellness")}
               gradient="from-purple-400 to-pink-500"
               clientType="GENERAL_WELLNESS"
             />
 
-            {/* Special Situation */}
+            {/* Movement Needs */}
             <ServiceCard
               id="special"
-              title="Special Situation"
-              description="Modified guidance for injury recovery, chronic conditions, or specific limitations."
+              title="Adaptive Packet"
+              description="Modified guidance for injury recovery or specific needs."
               icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>}
-              features={["Injury/condition assessment", "Safe movement patterns", "Progressive recovery", "Pain management"]}
-              details="Specialized programming for those recovering from injury or managing chronic conditions. Includes safe exercise modifications, progressive return-to-activity protocols, and pain management strategies. Always coordinate with your healthcare provider."
+              features={["Condition assessment", "Safe movement patterns", "Progressive protocols", "Pain management"]}
+              details="Programming for injury recovery or chronic conditions. Includes safe modifications, progressive protocols, and pain management strategies. Coordinate with your healthcare provider."
               expanded={expandedService === "special"}
               onToggle={() => toggleService("special")}
               gradient="from-blue-500 to-indigo-600"
@@ -249,7 +248,7 @@ export default function ServicesPage() {
               Not Sure Which Path to Choose?
             </h3>
             <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-              All programs are fully customized based on your unique intake responses. Start with any path and we'll tailor it specifically to your needs, goals, and preferences.
+              Every program is customized to your unique needs. Start with any path—we'll tailor it to your goals and preferences.
             </p>
             <Link href="/get-started">
               <Button 
@@ -330,10 +329,10 @@ export default function ServicesPage() {
       <section className="py-16 md:py-24 bg-gradient-to-br from-afya-primary via-afya-secondary to-afya-primary text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white drop-shadow-lg">
-            Ready to Transform Your Health?
+            Ready to Get Started?
           </h2>
           <p className="text-xl text-white/90 mb-8 drop-shadow-md">
-            Join thousands who have started their journey with AFYA. Get your personalized program in minutes.
+            Get your personalized program in minutes. Free assessment, instant results.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/get-started">

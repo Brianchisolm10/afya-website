@@ -68,6 +68,44 @@ async function verifySchema() {
   console.log('\nNew Packet fields available:');
   console.log('  - content, pdfUrl, templateId, generatedBy, generationMethod');
   console.log('  - retryCount, version, previousVersionId');
+
+  // Verify V2 models (Shop, Community, Gear Drive)
+  console.log('\n✓ Verifying AFYA Website V2 models:');
+  
+  try {
+    const productCount = await prisma.product.count();
+    console.log('  - Product model: ✓ (count:', productCount, ')');
+  } catch (e) {
+    console.log('  - Product model: ⚠️  Not found (may not be migrated yet)');
+  }
+
+  try {
+    const orderCount = await prisma.order.count();
+    console.log('  - Order model: ✓ (count:', orderCount, ')');
+  } catch (e) {
+    console.log('  - Order model: ⚠️  Not found (may not be migrated yet)');
+  }
+
+  try {
+    const communityStatsCount = await prisma.communityStats.count();
+    console.log('  - CommunityStats model: ✓ (count:', communityStatsCount, ')');
+  } catch (e) {
+    console.log('  - CommunityStats model: ⚠️  Not found (may not be migrated yet)');
+  }
+
+  try {
+    const gearDriveCount = await prisma.gearDriveSubmission.count();
+    console.log('  - GearDriveSubmission model: ✓ (count:', gearDriveCount, ')');
+  } catch (e) {
+    console.log('  - GearDriveSubmission model: ⚠️  Not found (may not be migrated yet)');
+  }
+
+  try {
+    const activityLogCount = await prisma.activityLog.count();
+    console.log('  - ActivityLog model: ✓ (count:', activityLogCount, ')');
+  } catch (e) {
+    console.log('  - ActivityLog model: ⚠️  Not found (may not be migrated yet)');
+  }
 }
 
 verifySchema()

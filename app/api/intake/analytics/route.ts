@@ -17,13 +17,25 @@ import type { AuthOptions } from 'next-auth';
  */
 export async function POST(request: NextRequest) {
   try {
-    const { requireAuth } = await import('@/lib/authorization');
-    const authResult = await requireAuth(request);
-    if (!authResult.authorized) {
-      return authResult.response;
+    // Parse body - handle both JSON and text (from sendBeacon)
+    let body;
+    const contentType = request.headers.get('content-type');
+    
+    if (contentType?.includes('application/json')) {
+      body = await request.json();
+    } else {
+      // Handle sendBeacon which sends as text
+      const text = await request.text();
+      try {
+        body = JSON.parse(text);
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid request format' },
+          { status: 400 }
+        );
+      }
     }
 
-    const body = await request.json();
     const { clientType, dropOffStep } = body;
 
     if (!clientType || typeof dropOffStep !== 'number') {

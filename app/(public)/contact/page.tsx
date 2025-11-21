@@ -182,8 +182,7 @@ export default function ContactPage() {
                 How long does it take to receive my personalized packets?
               </h3>
               <p className="text-gray-600">
-                After submitting your intake form, your packets are typically generated and ready within 3-5 business days. 
-                You'll receive an email notification when they're available in your dashboard.
+                Packets are typically ready within 3-5 business days. You'll receive an email when they're available in your dashboard.
               </p>
             </div>
 
@@ -192,8 +191,7 @@ export default function ContactPage() {
                 Is AFYA really free?
               </h3>
               <p className="text-gray-600">
-                Yes! The core AFYA experience—including your personalized Intro, Nutrition, and Workout packets—is completely free. 
-                Our mission is to make world-class fitness and wellness guidance accessible to everyone.
+                Yes! The core experience is completely free. Our mission is to make world-class fitness and wellness guidance accessible to everyone.
               </p>
             </div>
 
@@ -202,8 +200,7 @@ export default function ContactPage() {
                 What if I need to update my information or goals?
               </h3>
               <p className="text-gray-600">
-                You can reach out to us at afya@theafya.org to update your information. We can help adjust your plan 
-                as your goals and circumstances change.
+                Email us at afya@theafya.org to update your information. We'll help adjust your plan as your goals change.
               </p>
             </div>
 
@@ -212,8 +209,7 @@ export default function ContactPage() {
                 Do you work with schools or organizations?
               </h3>
               <p className="text-gray-600">
-                Yes! We're expanding into schools, sports teams, community programs, and corporate wellness. 
-                Contact us at afya@theafya.org to discuss partnership opportunities.
+                Yes! We're expanding into schools, sports teams, and corporate wellness. Contact us at afya@theafya.org to discuss partnerships.
               </p>
             </div>
           </div>

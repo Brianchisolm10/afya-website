@@ -2,75 +2,68 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Input, Card } from "@/components/ui";
+import { usePrefetch } from "@/lib/performance/usePrefetch";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [loginMethod, setLoginMethod] = useState<"credentials" | "magic">("credentials");
+  const [shouldPrefetch, setShouldPrefetch] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const loggedOut = searchParams.get("loggedOut") === "true";
+
+  // Prefetch dashboard resources on form interaction
+  usePrefetch(["/dashboard", "/api/me/client"], shouldPrefetch);
+
+  // Validate email format for immediate feedback
+  const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPasswordValid = password.length === 0 || password.length >= 8;
+  const canSubmit = email.length > 0 && password.length > 0 && isEmailValid && isPasswordValid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    // Immediate feedback - show loading state within 100ms
     setIsLoading(true);
 
     try {
-      if (loginMethod === "credentials") {
-        const result = await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        });
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: '/admin',
+        redirect: false,
+      });
 
-        // Check for errors
-        if (result?.error) {
-          // Handle specific error types
-          if (result.error === "Account suspended") {
-            setError("Your account has been suspended. Please contact your administrator.");
-          } else if (result.error === "CredentialsSignin") {
-            setError("Invalid email or password. Please try again.");
-          } else if (result.error.includes("rate limit") || result.error.includes("Too many")) {
-            setError("Too many login attempts. Please try again in 15 minutes.");
-          } else {
-            setError("Invalid email or password. Please try again.");
-          }
-          setIsLoading(false);
-        } else if (result?.ok) {
-          // Successful login - get session to check user role
-          const sessionResponse = await fetch('/api/auth/session');
-          const session = await sessionResponse.json();
-          
-          // Redirect based on role
-          if (session?.user?.role === 'ADMIN') {
-            router.push('/admin');
-          } else {
-            router.push(callbackUrl);
-          }
-        }
-      } else {
-        // Magic link flow
-        const result = await signIn("nodemailer", {
-          email,
-          redirect: false,
-          callbackUrl,
-        });
-
-        if (result?.error) {
-          setError("Failed to send magic link. Please try again.");
-          setIsLoading(false);
+      // Check for errors
+      if (result?.error) {
+        // Handle specific error types
+        if (result.error === "Account suspended") {
+          setError("Your account has been suspended. Please contact your administrator.");
+        } else if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password. Please try again.");
+        } else if (result.error.includes("rate limit") || result.error.includes("Too many")) {
+          setError("Too many login attempts. Please try again in 15 minutes.");
         } else {
-          setIsSubmitted(true);
-          setIsLoading(false);
+          setError("Invalid email or password. Please try again.");
         }
+        setIsLoading(false);
+      } else if (result?.ok) {
+        // Show success state for smooth transition
+        setIsSuccess(true);
+        
+        // Small delay to show success state before redirect
+        // This provides visual feedback that login was successful
+        setTimeout(() => {
+          window.location.href = result.url || '/admin';
+        }, 300);
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -78,14 +71,21 @@ export default function LoginPage() {
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-afya-primary to-blue-600 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <Card className="max-w-md w-full animate-fadeIn" padding="lg">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4" aria-hidden="true">
+  // Enable prefetching when user starts interacting with form
+  const handleFormInteraction = () => {
+    if (!shouldPrefetch) {
+      setShouldPrefetch(true);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-afya-primary to-blue-600 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-md w-full animate-fadeIn" padding="lg">
+        {isSuccess ? (
+          <div className="text-center py-8">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-scaleIn">
               <svg
-                className="h-6 w-6 text-green-600"
+                className="h-8 w-8 text-green-600"
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -93,48 +93,46 @@ export default function LoginPage() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <path d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Check Your Email
+              Login Successful!
             </h2>
-            <p className="text-gray-600 mb-6">
-              We've sent a magic link to <strong>{email}</strong>. Click the
-              link in the email to sign in to your account.
-            </p>
-            <p className="text-sm text-gray-500">
-              Didn't receive the email? Check your spam folder or{" "}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsSubmitted(false);
-                  setEmail("");
-                }}
-                className="text-afya-primary hover:underline font-medium inline"
-              >
-                try again
-              </Button>
-              .
+            <p className="text-gray-600">
+              Redirecting to your dashboard...
             </p>
           </div>
-        </Card>
-      </div>
-    );
-  }
+        ) : (
+          <>
+            <div className="mb-6">
+              <Link
+                href="/"
+                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-afya-primary rounded"
+              >
+                <svg
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+              </Link>
+            </div>
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-afya-primary to-blue-600 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-md w-full animate-fadeIn" padding="lg">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to AFYA
-          </h1>
-          <p className="text-gray-600">
-            Sign in to access your personalized health dashboard
-          </p>
-        </div>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Welcome to AFYA
+              </h1>
+              <p className="text-gray-600">
+                Sign in to access your personalized health dashboard
+              </p>
+            </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
@@ -146,37 +144,40 @@ export default function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={handleFormInteraction}
+            onBlur={() => setEmailTouched(true)}
             placeholder="you@example.com"
             disabled={isLoading}
             fullWidth
+            error={emailTouched && !isEmailValid ? "Please enter a valid email address" : undefined}
           />
 
-          {loginMethod === "credentials" && (
-            <>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                label="Password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                disabled={isLoading}
-                fullWidth
-                showPasswordToggle
-              />
-              <div className="text-right">
-                <Link
-                  href="/reset-password"
-                  className="text-sm text-afya-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-afya-primary rounded"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </>
-          )}
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            label="Password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onFocus={handleFormInteraction}
+            onBlur={() => setPasswordTouched(true)}
+            placeholder="Enter your password"
+            disabled={isLoading}
+            fullWidth
+            showPasswordToggle
+            error={passwordTouched && !isPasswordValid ? "Password must be at least 8 characters" : undefined}
+          />
+          
+          <div className="text-right">
+            <Link
+              href="/reset-password"
+              className="text-sm text-afya-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-afya-primary rounded"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           {loggedOut && (
             <div className="rounded-md bg-green-50 p-4" role="alert">
@@ -230,57 +231,29 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !canSubmit}
             isLoading={isLoading}
             variant="primary"
             size="lg"
             fullWidth
+            aria-label={isLoading ? "Signing in, please wait" : "Sign in to your account"}
           >
-            {isLoading
-              ? loginMethod === "credentials"
-                ? "Signing in..."
-                : "Sending magic link..."
-              : loginMethod === "credentials"
-              ? "Sign In"
-              : "Send Magic Link"}
+            {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
 
-        <div className="mt-6">
-          <button
-            type="button"
-            onClick={() => {
-              setLoginMethod(loginMethod === "credentials" ? "magic" : "credentials");
-              setError("");
-              setPassword("");
-            }}
-            className="w-full text-center text-sm text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-afya-primary rounded"
-          >
-            {loginMethod === "credentials"
-              ? "Or sign in with magic link instead"
-              : "Or sign in with password instead"}
-          </button>
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              href="/get-started"
-              className="text-afya-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-afya-primary rounded"
-            >
-              Get started
-            </Link>
-          </p>
-        </div>
-
-        {loginMethod === "magic" && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              We'll send you a magic link to sign in without a password. Check
-              your email inbox after clicking the button above.
-            </p>
-          </div>
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link
+                  href="/get-started"
+                  className="text-afya-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-afya-primary rounded"
+                >
+                  Get started
+                </Link>
+              </p>
+            </div>
+          </>
         )}
       </Card>
     </div>

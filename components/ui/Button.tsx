@@ -1,7 +1,7 @@
 import { ButtonHTMLAttributes, AnchorHTMLAttributes, forwardRef } from 'react';
 
 type BaseButtonProps = {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   fullWidth?: boolean;
@@ -32,31 +32,53 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
       ...restProps
     } = props;
 
+    // Base styles with consistent design system values
     const baseStyles =
-      'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-
-    const variantStyles = {
-      primary:
-        'bg-afya-primary text-white hover:bg-afya-primary-dark focus:ring-afya-primary shadow-sm hover:shadow-md',
-      secondary:
-        'bg-afya-secondary text-white hover:bg-afya-secondary-dark focus:ring-afya-secondary shadow-sm hover:shadow-md',
-      outline:
-        'border-2 border-afya-accent text-afya-dark hover:bg-gray-50 focus:ring-afya-accent bg-white',
-      ghost:
-        'text-afya-dark hover:bg-gray-100 focus:ring-afya-accent',
-      danger:
-        'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow-md',
+      'inline-flex items-center justify-center rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    
+    const baseStyle = {
+      fontWeight: 'var(--font-semibold)',
+      borderRadius: 'var(--radius-md)',
+      transitionDuration: 'var(--transition-base)',
     };
 
+    // Variant styles matching AFYA design system
+    const variantStyles = {
+      primary:
+        'bg-gradient-to-br from-[#40E0D0] to-[#9370DB] text-white hover:opacity-90 focus:ring-[#40E0D0] shadow-sm hover:shadow-md',
+      secondary:
+        'bg-[#9370DB] text-white hover:bg-[#8A2BE2] focus:ring-[#9370DB] shadow-sm hover:shadow-md',
+      outline:
+        'border-2 border-[#40E0D0] text-[#40E0D0] hover:bg-[#40E0D0] hover:text-white focus:ring-[#40E0D0] bg-white',
+    };
+
+    // Consistent sizing using design system spacing
+    // All sizes meet minimum 44x44px touch target requirement
     const sizeStyles = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: 'min-h-[44px]',
+      md: 'min-h-[44px]',
+      lg: '',
+    };
+
+    const sizeStyleValues = {
+      sm: { 
+        padding: 'var(--space-2) var(--space-4)',
+        fontSize: 'var(--text-sm)',
+      },
+      md: { 
+        padding: 'var(--space-3) var(--space-6)',
+        fontSize: 'var(--text-base)',
+      },
+      lg: { 
+        padding: 'var(--space-4) var(--space-8)',
+        fontSize: 'var(--text-lg)',
+      },
     };
 
     const widthStyles = fullWidth ? 'w-full' : '';
     const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyles} ${className}`;
 
+    // Loading spinner component
     const loadingSpinner = isLoading && (
       <svg
         className="animate-spin -ml-1 mr-2 h-4 w-4"
@@ -81,12 +103,18 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
       </svg>
     );
 
+    const combinedStyle = {
+      ...baseStyle,
+      ...sizeStyleValues[size],
+    };
+
     if (as === 'a') {
       const anchorProps = restProps as AnchorHTMLAttributes<HTMLAnchorElement>;
       return (
         <a
           ref={ref as React.Ref<HTMLAnchorElement>}
           className={combinedClassName}
+          style={combinedStyle}
           {...anchorProps}
         >
           {loadingSpinner}
@@ -101,6 +129,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
         ref={ref as React.Ref<HTMLButtonElement>}
         disabled={disabled || isLoading}
         className={combinedClassName}
+        style={combinedStyle}
         {...buttonProps}
       >
         {loadingSpinner}

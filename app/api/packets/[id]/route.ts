@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authConfig } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 import { PDFExportService } from '@/lib/intake/pdf-export-service';
 

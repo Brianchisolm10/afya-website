@@ -425,3 +425,97 @@ enum NotificationType {
   SYSTEM_ALERT
   GENERAL
 }
+
+// Discovery Flow - Leads
+model Lead {
+  id                String        @id @default(cuid())
+  status            LeadStatus    @default(PENDING_CALL)
+  
+  // Contact Information
+  fullName          String
+  email             String
+  phone             String
+  
+  // Discovery Form Data
+  primaryGoal       String        // 'nutrition', 'training', 'youth', 'general', 'other'
+  goalDescription   String?
+  startTimeframe    String        // 'asap', 'within_month', '1_3_months', 'exploring'
+  referralSource    String?
+  
+  // Call Scheduling
+  scheduledCallAt   DateTime?
+  callCompletedAt   DateTime?
+  callNotes         String?
+  
+  // Assignment & Conversion
+  assignedCoachId   String?
+  convertedToUserId String?
+  followUpDate      DateTime?
+  
+  // Tracking
+  sourceUtm         String?       // JSON string of UTM parameters
+  ipAddress         String?
+  userAgent         String?
+  
+  // Relations
+  notes             LeadNote[]
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([status])
+  @@index([email])
+  @@index([assignedCoachId])
+  @@index([createdAt])
+  @@index([status, createdAt])
+}
+
+enum LeadStatus {
+  PENDING_CALL
+  CALL_SCHEDULED
+  CALL_COMPLETED
+  CONVERTED
+  NOT_INTERESTED
+  FOLLOW_UP
+}
+
+model LeadNote {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  authorId  String   // User ID of who created the note
+  content   String
+  createdAt DateTime @default(now())
+  
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+// Performance Monitoring
+model PerformanceMetric {
+  id             String   @id @default(cuid())
+  pageName       String
+  url            String
+  
+  // Core Web Vitals
+  fcp            Float?   // First Contentful Paint (ms)
+  lcp            Float?   // Largest Contentful Paint (ms)
+  fid            Float?   // First Input Delay (ms)
+  cls            Float?   // Cumulative Layout Shift (score)
+  ttfb           Float?   // Time to First Byte (ms)
+  
+  // Additional Metrics
+  pageLoadTime   Float?   // Total page load time (ms)
+  
+  // Context
+  deviceType     String?  // 'mobile', 'tablet', 'desktop'
+  connectionType String?  // '4g', '3g', 'wifi', etc.
+  userAgent      String?
+  
+  timestamp      DateTime @default(now())
+  
+  @@index([pageName, timestamp])
+  @@index([timestamp])
+  @@index([pageName])
+  @@index([deviceType])
+}

@@ -1,46 +1,56 @@
 import { HTMLAttributes, forwardRef } from 'react';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'bordered' | 'elevated';
+  variant?: 'elevated' | 'flat' | 'hover';
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  hoverable?: boolean;
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   (
     {
       children,
-      variant = 'default',
+      variant = 'flat',
       padding = 'md',
-      hoverable = false,
       className = '',
       ...props
     },
     ref
   ) => {
-    const baseStyles = 'bg-white rounded-lg';
+    // Base styles with consistent border radius using CSS variables
+    const baseStyles = 'bg-white';
 
+    // Variant styles matching design requirements
     const variantStyles = {
-      default: 'border border-gray-200',
-      bordered: 'border-2 border-gray-300',
-      elevated: 'shadow-md',
+      elevated: 'shadow-[0_1px_3px_rgba(0,0,0,0.1)] transition-shadow',
+      flat: 'border border-gray-200',
+      hover: 'shadow-[0_1px_3px_rgba(0,0,0,0.1)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:-translate-y-1 cursor-pointer',
     };
 
+    // Consistent padding using design system spacing (CSS variables)
     const paddingStyles = {
       none: '',
-      sm: 'p-4',
-      md: 'p-6',
-      lg: 'p-8',
+      sm: '',      // Applied via style prop
+      md: '',      // Applied via style prop
+      lg: '',      // Applied via style prop
     };
 
-    const hoverStyles = hoverable
-      ? 'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'
-      : '';
+    const paddingValues = {
+      none: {},
+      sm: { padding: 'var(--space-4)' },
+      md: { padding: 'var(--space-6)' },
+      lg: { padding: 'var(--space-8)' },
+    };
 
     return (
       <div
         ref={ref}
-        className={`${baseStyles} ${variantStyles[variant]} ${paddingStyles[padding]} ${hoverStyles} ${className}`}
+        className={`${baseStyles} ${variantStyles[variant]} ${paddingStyles[padding]} ${className}`}
+        style={{
+          borderRadius: 'var(--radius-lg)',
+          transitionDuration: 'var(--transition-base)',
+          ...paddingValues[padding],
+          ...props.style,
+        }}
         {...props}
       >
         {children}

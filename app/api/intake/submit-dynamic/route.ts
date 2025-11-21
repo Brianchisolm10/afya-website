@@ -89,6 +89,40 @@ export async function POST(request: NextRequest) {
       sanitizedResponses
     );
 
+    // Track intake completion (analytics)
+    try {
+      const { prisma } = await import('@/lib/db');
+      
+      // Find the most recent incomplete analytics record for this client type
+      const analyticsRecord = await prisma.intakeAnalytics.findFirst({
+        where: {
+          clientType: body.clientType,
+          completedAt: null,
+          abandonedAt: null
+        },
+        orderBy: {
+          startedAt: 'desc'
+        }
+      });
+
+      if (analyticsRecord) {
+        const completionTime = Math.floor(
+          (new Date().getTime() - new Date(analyticsRecord.startedAt).getTime()) / 1000
+        );
+
+        await prisma.intakeAnalytics.update({
+          where: { id: analyticsRecord.id },
+          data: {
+            completedAt: new Date(),
+            completionTime
+          }
+        });
+      }
+    } catch (analyticsError) {
+      // Log but don't fail the request if analytics tracking fails
+      console.error('Failed to track intake completion:', analyticsError);
+    }
+
     // Return success response
     return NextResponse.json({
       success: true,
